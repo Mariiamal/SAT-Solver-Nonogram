@@ -9,7 +9,18 @@ More information about the nonograms are available online [online](https://en.wi
 The problem is described by giving the solver the .txt file with the input (grid with the rows and columns constraints) and getting the result after processing, showing if this is valid colorable nonogram or not. 
 
 An example of a valid input format is a 
+4 4
+1 1 
+1 1 
+2
+3
+2
+2
+1 1
+3
 
+First line: number of rows $m$ and number of columns $n$. Next $m$ lines are the constraints for all $m$ rows. One line per each row. Next $n$ lines are the column constraints, similarly one per each column. By convention, there can be empty row or empty column - no cells are colored, this will be denoted as 0. 
+Note: if sum of $m$ rows does not equal sum of $n$ columns - trivially not a valid nonogram. 
 
 ## Encoding 
 
