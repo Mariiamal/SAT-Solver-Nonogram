@@ -1,0 +1,6 @@
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/glucose.dir
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/glucose-simp.dir
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/glucosep.dir
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/glucose-syrup.dir
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/edit_cache.dir
+/home/mariiamaliaran/Desktop/sat solver nanogram/glucose/CMakeFiles/rebuild_cache.dir
