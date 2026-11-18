@@ -69,8 +69,8 @@ def generate_valid_placements(length, clue):
 # x1 is cell colored black and ~x1 is cell colored white 
 # in the variables it is p1 and -p1 
 
-
 # variables counter gives us the starting point for the pattern variables numbers
+# cells_variable_numbers - list 
 def encode_line(cells_variable_numbers, clue, variables_counter): 
     clauses = []
     patterns_variable_numbers = []
@@ -86,12 +86,24 @@ def encode_line(cells_variable_numbers, clue, variables_counter):
             if (pattern[i] == 1): clauses.append([-p, cells_variable_numbers[i]])
             elif (pattern[i] == 0): clauses.append([-p, -cells_variable_numbers[i]])
 
-    pattern_clause = []
-    for i in range(len(patterns_variable_numbers)): 
-        pattern_clause.append(patterns_variable_numbers[i])
-    clauses.append(pattern_clause)
-    
+    clauses.append(patterns_variable_numbers)
+
     return clauses, variables_counter
 
-def encode()
+def encode(instance): 
+    number_of_rows, number_of_cols, rows, cols = instance
+    clauses = []
+    # start from rows*cols+1 because thats the cells variables which are already taken
+    variables_counter = number_of_rows * number_of_cols + 1
 
+    for i in range(number_of_rows):
+        cells = [get_variable_number((i, j), number_of_cols) for j in range(number_of_cols)]
+        row_clauses, variables_counter = encode_line(cells, rows[i], variables_counter)
+        clauses.extend(row_clauses)
+
+    for j in range(number_of_cols):
+        cells = [get_variable_number((i, j), number_of_cols) for i in range(number_of_rows)]
+        column_clauses, variables_counter = encode_line(cells, cols[i], variables_counter)
+        clauses.extend(column_clauses)
+
+    return clauses, variables_counter - 1
