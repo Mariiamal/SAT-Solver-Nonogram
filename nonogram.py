@@ -3,7 +3,6 @@ from argparse import ArgumentParser
 
 def parse_clue(line): 
     clue = tuple(map(int, line.split()))
-   # if any(i < 0 for i in clue): raise ValueError("Invalid negative number in a constraint, unsatisfiable")
     return () if clue == (0,) else clue
 
 
@@ -18,10 +17,6 @@ def load_instance(input_file_name):
             rows.append(parse_clue(next(file)))
         for _ in range(number_of_cols): 
             cols.append(parse_clue(next(file)))
-    # sum_of_rows_colored = sum(map(sum, rows))
-    # sum_of_cols_colored = sum(map(sum, cols))
-    # if sum_of_rows_colored != sum_of_cols_colored: 
-    #     raise ValueError("Row and column clues have different totals, trivially unsatisfiable")
   
     return number_of_rows, number_of_cols, rows, cols
 
@@ -66,9 +61,6 @@ def generate_valid_placements(length, clue):
     recursive_placement_helper(0, 0)
     return valid_placements
 
-# x1 is cell colored black and ~x1 is cell colored white 
-# in the variables it is p1 and -p1 
-
 # variables counter gives us the starting point for the pattern variables numbers
 # cells_variable_numbers - list 
 def encode_line(cells_variable_numbers, clue, variables_counter): 
@@ -83,8 +75,8 @@ def encode_line(cells_variable_numbers, clue, variables_counter):
         patterns_variable_numbers.append(p)
 
         for i in range(len(cells_variable_numbers)): 
-            if (pattern[i] == 1): clauses.append([-p, cells_variable_numbers[i]])
-            elif (pattern[i] == 0): clauses.append([-p, -cells_variable_numbers[i]])
+            if pattern[i] == 1: clauses.append([-p, cells_variable_numbers[i]])
+            elif pattern[i] == 0: clauses.append([-p, -cells_variable_numbers[i]])
 
     clauses.append(patterns_variable_numbers)
 
@@ -92,18 +84,124 @@ def encode_line(cells_variable_numbers, clue, variables_counter):
 
 def encode(instance): 
     number_of_rows, number_of_cols, rows, cols = instance
-    clauses = []
+    cnf = []
     # start from rows*cols+1 because thats the cells variables which are already taken
     variables_counter = number_of_rows * number_of_cols + 1
 
     for i in range(number_of_rows):
         cells = [get_variable_number((i, j), number_of_cols) for j in range(number_of_cols)]
         row_clauses, variables_counter = encode_line(cells, rows[i], variables_counter)
-        clauses.extend(row_clauses)
+        cnf.extend(row_clauses)
 
     for j in range(number_of_cols):
         cells = [get_variable_number((i, j), number_of_cols) for i in range(number_of_rows)]
-        column_clauses, variables_counter = encode_line(cells, cols[i], variables_counter)
-        clauses.extend(column_clauses)
+        column_clauses, variables_counter = encode_line(cells, cols[j], variables_counter)
+        cnf.extend(column_clauses)
 
-    return clauses, variables_counter - 1
+    return cnf, variables_counter - 1
+
+
+def call_solver(cnf, variables_number, output_filename, solver_name, verbosity): 
+    # print CNF into formula.cnf in DIMCS format
+    with open(output_filename, "w") as file: 
+        file.write("p cnf " + str(variables_number) + " " + str(len(cnf)) + '\n')
+        for clause in cnf: 
+            file.write(' '.join(str(lit) for lit in clause + ["0"]) + '\n')
+
+    # call the solver and return result 
+    return subprocess.run(['./' + solver_name, '-model', '-verb=' + str(verbosity) , output_filename], stdout=subprocess.PIPE)
+
+
+# convention: 10=SAT, 20=UNSAT, 0=UNKNOWN, 1(or other non-zero)=Error
+def print_result(result, number_of_rows, number_of_cols): 
+    # print the whole output of the SAT solver to the stdout for me to see
+    for line in result.stdout.decode('utf-8').split('\n'):
+        print(line)
+
+    if result.returncode == 20: 
+        print("UNSAT")
+        return
+    elif result.returncode == 0: 
+        print("UNKNOWN")
+        return
+    elif result.returncode != 10:
+        print("Error")
+
+    model = []
+    for line in result.stdout.decode('utf-8').split('\n'):
+        if line.startswith("v"):    # there might be more lines of the model, each starting with 'v'
+            variables = line.split()
+            vars.remove("v")
+            model.extend(int(v) for v in variables)      
+    model.remove(0) # 0 is the end of the model, just ignore it
+
+    print()
+    print("##################################################################")
+    print("###########[ Human readable result of the Nonogram ]###########")
+    print("##################################################################")
+    print()
+
+    # decode the meaning of the assignment
+    for i in range(number_of_rows): 
+        for j in range(number_of_cols): 
+            v = get_variable_number((i,j), number_of_cols)
+            if model[v-1] > 0: 
+                print("#", end="")
+            else: 
+                print('.', end="")
+        print()
+
+if __name__ == "__main__": 
+    parser = ArgumentParser()
+
+    parser.add_argument(
+        "-i",
+        "--input",
+        default="input.in",
+        type=str,
+        help=(
+            "The instance file."
+        ),
+    )
+    parser.add_argument(
+        "-o",
+        "--output",
+        default="formula.cnf",
+        type=str,
+        help=(
+            "Output file for the DIMACS format (i.e. the CNF formula)."
+        ),
+    )
+    parser.add_argument(
+        "-s",
+        "--solver",
+        default="glucose-syrup",
+        type=str,
+        help=(
+            "The SAT solver to be used."
+        ),
+    )
+    parser.add_argument(
+        "-v",
+        "--verb",
+        default=1,
+        type=int,
+        choices=range(0,2),
+        help=(
+            "Verbosity of the SAT solver used."
+        ),
+    )
+    args = parser.parse_args()
+
+    # get the input instance
+    instance = load_instance(args.input)
+    number_of_rows, number_of_cols, rows, cols = instance
+
+    # encode the problem to create CNF formula
+    cnf, variables_number = encode(instance)
+
+    # call the SAT solver and get the result
+    result = call_solver(cnf, variables_number, args.output, args.solver, args.verb)
+
+    # interpret the result and print it in a human-readable format
+    print_result(result, number_of_rows, number_of_cols)
