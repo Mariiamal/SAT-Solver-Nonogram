@@ -102,7 +102,7 @@ def encode(instance):
 
 
 def call_solver(cnf, variables_number, output_filename, solver_name, verbosity): 
-    # print CNF into formula.cnf in DIMCS format
+    # print CNF into formula.cnf in DIMACS format
     with open(output_filename, "w") as file: 
         file.write("p cnf " + str(variables_number) + " " + str(len(cnf)) + '\n')
         for clause in cnf: 
@@ -126,18 +126,19 @@ def print_result(result, number_of_rows, number_of_cols):
         return
     elif result.returncode != 10:
         print("Error")
+        return
 
     model = []
     for line in result.stdout.decode('utf-8').split('\n'):
         if line.startswith("v"):    # there might be more lines of the model, each starting with 'v'
             variables = line.split()
-            vars.remove("v")
+            variables.remove("v")
             model.extend(int(v) for v in variables)      
     model.remove(0) # 0 is the end of the model, just ignore it
 
     print()
     print("##################################################################")
-    print("###########[ Human readable result of the Nonogram ]###########")
+    print("###########[ Human readable result of the Nonogram ]##############")
     print("##################################################################")
     print()
 
