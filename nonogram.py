@@ -112,11 +112,12 @@ def call_solver(cnf, variables_number, output_filename, solver_name, verbosity):
     return subprocess.run(['./' + solver_name, '-model', '-verb=' + str(verbosity) , output_filename], stdout=subprocess.PIPE)
 
 # Convention: 10=SAT, 20=UNSAT, 0=UNKNOWN, 1(or other non-zero)=Error
-def print_result(result, number_of_rows, number_of_cols): 
+def print_result(result, number_of_rows, number_of_cols, show_model=False): 
 
     # Print the whole output of the SAT solver to the stdout
     for line in result.stdout.decode('utf-8').split('\n'):
-        print(line)
+        if show_model or not line.startswith("v"):
+            print(line)
 
     if result.returncode == 20: 
         print("UNSAT")
@@ -192,6 +193,11 @@ if __name__ == "__main__":
             "Verbosity of the SAT solver used."
         ),
     )
+    parser.add_argument(
+        "--show-model", 
+        action="store_true",
+        help="Print the raw model (lines starting with 'v') from the SAT solver"
+    )
     args = parser.parse_args()
 
     # Get the input instance
@@ -205,5 +211,4 @@ if __name__ == "__main__":
     result = call_solver(cnf, variables_number, args.output, args.solver, args.verb)
 
     # Interpret the result and print it in a human-readable format
-    print_result(result, number_of_rows, number_of_cols)
-  
+    print_result(result, number_of_rows, number_of_cols, args.show_model)
