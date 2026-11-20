@@ -55,7 +55,7 @@ python3 nonogram.py -i instances/input-10by10.in --show-model
 
 * `input-3by3.in`: A 3x3 instance, the fastest and the easiest, human-solvable
 * `input-3by3unsat.in`: A 3x3 instance, unsolvable
-* `input-5by5.in`: A 5x5 instance, 
+* `input-5by5.in`: A 5x5 instance
 * `input-5by5unsat.in`: A 5x5 instance, unsolvable
 * `input-10by10.in`: A 10x10 instance
 * `input-10by10unsat.in`: A 10x10 instance, unsolvable
