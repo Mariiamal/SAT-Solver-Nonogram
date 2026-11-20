@@ -1,5 +1,7 @@
 import subprocess
 from argparse import ArgumentParser 
+import os
+import shutil
 
 def parse_clue(line): 
     clue = tuple(map(int, line.split()))
@@ -83,32 +85,44 @@ def encode_line(cells_variable_numbers, clue, variables_counter):
 
     return clauses, variables_counter
 
-def encode(instance): 
+def write_clauses(clauses, filename): 
+    for clause in clauses: 
+        filename.write(' '.join(str(litteral) for litteral in clause) + " 0\n")
+
+def encode(instance, clauses_filename): 
     number_of_rows, number_of_cols, rows, cols = instance
-    cnf = []
     # Start from rows*cols+1 - that are the cells variables numbers which are already reserved
     variables_counter = number_of_rows * number_of_cols + 1
+    clauses_number = 0
 
-    for i in range(number_of_rows):
-        cells = [get_variable_number((i, j), number_of_cols) for j in range(number_of_cols)]
-        row_clauses, variables_counter = encode_line(cells, rows[i], variables_counter)
-        cnf.extend(row_clauses)
+    with open(clauses_filename, "w") as body: 
+        for i in range(number_of_rows):
+            cells = [get_variable_number((i, j), number_of_cols) for j in range(number_of_cols)]
+            row_clauses, variables_counter = encode_line(cells, rows[i], variables_counter)
+            write_clauses(row_clauses, body)
+            clauses_number += len(row_clauses)
 
-    for j in range(number_of_cols):
-        cells = [get_variable_number((i, j), number_of_cols) for i in range(number_of_rows)]
-        column_clauses, variables_counter = encode_line(cells, cols[j], variables_counter)
-        cnf.extend(column_clauses)
+        for j in range(number_of_cols):
+            cells = [get_variable_number((i, j), number_of_cols) for i in range(number_of_rows)]
+            column_clauses, variables_counter = encode_line(cells, cols[j], variables_counter)
+            write_clauses(column_clauses, body)
+            clauses_number += len(column_clauses)
 
-    return cnf, variables_counter - 1
+    return variables_counter - 1, clauses_number
 
-def call_solver(cnf, variables_number, output_filename, solver_name, verbosity): 
+def call_solver(clauses_filename, variables_number, clauses_number, output_filename, solver_name, verbosity): 
     # Print CNF into formula.cnf in DIMACS format
     with open(output_filename, "w") as file: 
-        file.write("p cnf " + str(variables_number) + " " + str(len(cnf)) + '\n')
-        for clause in cnf: 
-            file.write(' '.join(str(lit) for lit in clause + ["0"]) + '\n')
+        file.write("p cnf " + str(variables_number) + " " + str(clauses_number) + '\n')
+        with open(clauses_filename, "r") as body: 
+            shutil.copyfileobj(body, file)
+    os.remove(clauses_filename)
 
     # Call the solver and return result 
+    # running one thread of glucose: 
+    # return subprocess.run(['./' + solver_name, '-model', '-nthreads=1', '-maxnbthreads=1', '-verb=' + str(verbosity), output_filename], stdout=subprocess.PIPE)
+
+    # running multiple threads of glucose (4): 
     return subprocess.run(['./' + solver_name, '-model', '-verb=' + str(verbosity) , output_filename], stdout=subprocess.PIPE)
 
 # Convention: 10=SAT, 20=UNSAT, 0=UNKNOWN, 1(or other non-zero)=Error
@@ -205,10 +219,11 @@ if __name__ == "__main__":
     number_of_rows, number_of_cols, rows, cols = instance
 
     # Encode the problem to create CNF formula
-    cnf, variables_number = encode(instance)
+    clauses_filename = args.output + ".clauses"
+    variables_number, clauses_number = encode(instance, clauses_filename)
 
     # Call the SAT solver and get the result
-    result = call_solver(cnf, variables_number, args.output, args.solver, args.verb)
+    result = call_solver(clauses_filename, variables_number, clauses_number, args.output, args.solver, args.verb)
 
     # Interpret the result and print it in a human-readable format
     print_result(result, number_of_rows, number_of_cols, args.show_model)
