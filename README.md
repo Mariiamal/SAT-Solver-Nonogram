@@ -46,7 +46,7 @@ Command-line options:
 *  `-v {0,1}`, `--verb {0,1}` :  Verbosity of the SAT solver used. 0 hides the solver statistics and program output, 1 includes it.
 *  `--show-model`: Also prints the raw model (lines starting with 'v') returned by SAT solver to the stdout. Be default hidden due to the big size for big instances and not suitable for human - readable solution.
 
-Example of the call to additionally print the models for an instance of the input:
+Example of the call to additionally print the model for an instance of the input:
 ```
 python3 nonogram.py -i instances/input-10by10.in --show-model
 ```
