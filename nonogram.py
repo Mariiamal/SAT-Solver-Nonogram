@@ -87,7 +87,7 @@ def encode_line(cells_variable_numbers, clue, variables_counter):
 
 def write_clauses(clauses, filename): 
     for clause in clauses: 
-        filename.write(' '.join(str(litteral) for litteral in clause) + " 0\n")
+        filename.write(' '.join(str(literal) for literal in clause) + " 0\n")
 
 def encode(instance, clauses_filename): 
     number_of_rows, number_of_cols, rows, cols = instance
@@ -119,9 +119,6 @@ def call_solver(clauses_filename, variables_number, clauses_number, output_filen
     os.remove(clauses_filename)
 
     # Call the solver and return result 
-    # running one thread of glucose: 
-    # return subprocess.run(['./' + solver_name, '-model', '-nthreads=1', '-maxnbthreads=1', '-verb=' + str(verbosity), output_filename], stdout=subprocess.PIPE)
-
     # running multiple threads of glucose (4): 
     return subprocess.run(['./' + solver_name, '-model', '-verb=' + str(verbosity) , output_filename], stdout=subprocess.PIPE)
 
