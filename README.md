@@ -25,12 +25,34 @@ First line: number of rows $m$ and number of columns $n$. Next $m$ lines are the
 
 ## Encoding 
 The problem is encoded using two sets of variables - cells variables and pattern variables. 
-For $m \times n$ grid, there are $mn$ cells, each of the form $(row, column)$. Each cell is mapped to its variable number. According to the DIMACS CNF format, the first variable will have number 1. The last cell variable number is $m*n + 1$. 
-The convention of the DIMACS CNF format: let $x$ be a variable. Then, if $x$ is True, $v(x) = 1$, it is denoted as $x$ in final CNF. If $x$ is False, $v(x) = 0$, it is denoted as $-x$. 
-Second set of variables - pattern variables, denoted as $p$. The first pattern variable number will be $m*n+2$, for all next variables, increment their number by 1.
+
+For $m \times n$ grid, there are $m \times n$ cells, each of the form $(row, column)$. Each cell is mapped to its variable number. According to the DIMACS CNF format, the first variable will have number 1, such that cells variables are $1, \dots, m \times n$. Variable is True, when it is colored. In the results it is shown as # (hashtag). Variable is False, when it is not colored, denoted as . (dot). 
+
+By DIMACS CNF, $x$ means that variable $x$ is True and $-x$ means that x is False.
+
+Second set of variables - pattern variables, denoted as $p$. The first pattern variable has number $m \times n + 1$, all next variables are numbered one higher. For each row and column, we generate all possible valid placements that satisfy the given constraint for that line. For each such placement, set one pattern variable. 
 
 To understand if there is a solution to the given nonogram, we use the following constraints: 
-- If the sum of $m$ rows does not equal the sum of $n$ columns - trivially not a valid nonogram - UNSAT
+- Numbers in the input file has to be non-negative (0 is valid by the rules of the game). 
+- If the sum of $m$ rows does not equal the sum of $n$ columns - not a valid nonogram, UNSAT.
+- The sum of the constraints + gaps between them must be less than or equal to the length of the line, otherwise UNSAT.
+- Process every row and column (further see as line):
+  
+  As previously noted, all possible placements of the blocks, defined by the constraint with minimum unit gap in between, are generated for each line and pattern variables are       assigned. Cells inside the block are colored (variable is True). There can be several placements for each line, but there is only one final pattern which will satisfy the          assignment. If the pattern variable $p$ is True, it implies that every cell of the line must have the value that $p$ assigns to it.
+  $p \implies l_1 \wedge l_2 \wedge \dots \wedge l_k$, where $l_i$ is $x_i$ if the cell is colored and $\neg x_i$ if not, $\forall i = 1 \dots k$, where $k$ is the length of the     line.
+  For each cell add the corresponding clause to the CNF formula:
+  - $x$ is True in pattern $p$, then $(\neg p \vee x)$
+  - $x$ is False in pattern $p$, then $(\neg p \vee \neg x)$
+- There is only one proper assignment for the line:
+  
+  If there were 2 valid assignments, their patterns have to differ at least in one cell, so that one cell will be colored and blank at the same time, which is contradiction to the   satisfiability of the nonogram.
+- There is at least one valid placement per line:
+
+  For each line, after adding all placement clauses, include the clause with all of its pattern variables, which is equivalent to saying that there is at least one proper            placement. Example: there are 3 patterns $p_{15}$, $p_{16}$, $p_{17}$ for a line, add clause $(p_{15} \vee p_{16} \vee p_{17})$ to the CNF.
+
+## Alternatives of the encoding
+
+
 
 ## User documentation 
 
