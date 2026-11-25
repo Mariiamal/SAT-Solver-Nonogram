@@ -6,7 +6,7 @@ Nonograms are popular picture puzzles. Nonogram is a $m \times n$ grid of cells 
 As a result the user gets valid coloring of the cells, which results in the picture. 
 More information about the nonograms are available online [Wikipedia](https://en.wikipedia.org/wiki/Nonogram).
 
-The problem is described by giving the solver the .in file with the input (grid with the rows and columns constraints) and getting the result after processing, showing if this is valid colorable nonogram or not - solver prints s SATISFIABLE/s UNSATISFIABLE to the stdout, the statistics and the 'colored' nonogram (if SAT). 
+The problem is described by giving the solver the .in file with the input (grid with the rows and columns constraints) and getting the result after processing, showing if this is valid colorable nonogram or not - solver prints s SATISFIABLE and 'colored' nonogram made of #(hashtag) and .(dot)/s UNSATISFIABLE, UNSAT to the stdout and statistics of the solver run.
 
 The goal is to find one satisfying assignment or to report that it does not exist.
 
@@ -56,7 +56,17 @@ To understand if there is a solution to the given nonogram, we use the following
 
 ## Alternatives of the encoding
 
+In the encoding described above, for each line we find all possible valid placements of the blocks from the corresponding clue and encode it using pattern and cell variables, such that visualization of the coloring, the algorithm of encoding and correctness is clear. The main disadvantage is the size of this encoding - each line produces multiple clauses to the output file for DIMACS format, such that big instances produce millions of clauses (e.g. for the instance 26x26, given as the hardest input in this project, roughly 8 million clauses were generated). Let $l$ be the length of the line and $B$ be a number of blocks of the clue with total length $t$, then, the number of the valid placements produced is $\binom{l-t+1}{B}$. Due to the size of the formula, the biggest amount of time is spent on reading and simplifying rather than searching for the correct truth assignment and solving the task - whether it is satisfiable or not. 
 
+Alternative encoding of the problem: 
+Do not list all placements and the corresponding clauses, but consider the start cell of each block of the clue of the line. Let variable $s(b, c)$, where $b$ is the block index in the clue and $c$ is the cell position in the line, be the start cell of the block. So, $s(b, c)$ is True if the block $b$ starts at the cell $c$, otherwise False.
+Then, for each line, every block $b$ gets several variables which depend on the free space of the line. For the line of length $l$, total length taken by blocks and min gap 1 in between is $B+t-1$, then the free space is $l-B-t+1$. Moreover, 4 rules must hold for each line, and later will be transformed into the clauses:
+- Each block starts exactly once, it cannot be put several times in one line.
+- If block $b$ was placed at the cell $c$, the  first possible cell, where the next block $b+1$ can be put, is $c+a+1$ where $a$ is the length of the block $b$.
+- If the block $b$ was placed at the cell $c$, all cells that are 'inside' this block must be 'colored' (True, #(hashtag)). This implies that if the cell is 'not colored', it is not in any block.
+- If the cell is 'colored', it belongs to some block.
+  
+Therefore, the number of the variables will be polynomial in the length and number of blocks, $B \times ((l-B-t+1)+1)$, which is less than the binomial coefficient of the variables per each line. Those block start variables are then used to build these 4 clauses, which are then added into the output file. Such procedure is repeated for each line. 
 
 ## User documentation 
 
@@ -91,4 +101,4 @@ python3 nonogram.py -i instances/input-10by10.in --show-model
 * `input-10by10.in`: A 10x10 instance
 * `input-10by10unsat.in`: A 10x10 instance, unsolvable
 * `input-25by25.in`: A 25x25 instance, medium-sized instance, around 7s
-* `input-26by26hard.in`: A 26x26 instance, the hardest example, takes approximately 61s of real time and 207s of cpu time to solve on this machine
+* `input-26by26hard.in`: A 26x26 instance, the hardest example, takes approximately 61s of real time and 207s of cpu time to solve on this machine (using default 4 threads). 
