@@ -6,7 +6,7 @@ Nonograms are popular picture puzzles. Nonogram is a $m \times n$ grid of cells 
 As a result the user gets valid coloring of the cells, which results in the picture. 
 More information about the nonograms are available online [Wikipedia](https://en.wikipedia.org/wiki/Nonogram).
 
-The problem is described by giving the solver the .in file with the input (grid with the rows and columns constraints) and getting the result after processing, showing if this is valid colorable nonogram or not - solver prints s SATISFIABLE and 'colored' nonogram made of #(hashtag) and .(dot)/s UNSATISFIABLE, UNSAT to the stdout and statistics of the solver run.
+The problem is described by giving the solver the .in file with the input (grid with the rows and columns constraints) and getting the result after processing, showing if this is valid colorable nonogram or not - solver prints s SATISFIABLE and 'colored' nonogram made of #(hashtag) and .(dot)/s UNSATISFIABLE, UNSAT to the stdout and statistics of the solver run for both cases.
 
 The goal is to find one satisfying assignment or to report that it does not exist.
 
