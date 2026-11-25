@@ -30,9 +30,9 @@ First line: number of rows $m$ and number of columns $n$. Next $m$ lines are the
 ## Encoding 
 The problem is encoded using two sets of variables - cells variables and pattern variables. 
 
-For $m \times n$ grid, there are $m \times n$ cells, each of the form $(row, column)$. Each cell is mapped to its variable number. According to the DIMACS CNF format, the first variable will have number 1, such that cells variables are $1, \dots, m \times n$. Variable is True, when it is colored. In the results it is shown as # (hashtag). Variable is False, when it is not colored, denoted as . (dot). 
+For $m \times n$ grid, there are $m \times n$ cells, each of the form $(row, column)$. Each cell is mapped to its variable number. According to the DIMACS CNF format, the first variable will have number 1, such that cells variables are $1, \dots, m \times n$. Variable is True, when it is colored. In the results it is denoted as # (hashtag). Variable is False, when it is not colored, denoted as . (dot). 
 
-By DIMACS CNF, $x$ means that variable $x$ is True and $-x$ means that x is False.
+By DIMACS CNF, $x$ means that variable $x$ is True and $-x$ means that $x$ is False.
 
 Second set of variables - pattern variables, denoted as $p$. The first pattern variable has number $m \times n + 1$, all next variables are numbered one higher. For each row and column, we generate all possible valid placements that satisfy the given constraint for that line. For each such placement, set one pattern variable. 
 
