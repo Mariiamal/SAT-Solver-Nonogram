@@ -102,4 +102,24 @@ python3 nonogram.py -i instances/input-10by10.in --show-model
 * `input-10by10.in`: A 10x10 instance.
 * `input-10by10unsat.in`: A 10x10 instance, unsolvable.
 * `input-25by25.in`: A 25x25 instance, medium-sized instance, around 7s.
-* `input-26by26hard.in`: A 26x26 instance, the hardest example, takes approximately 61s of real time and 207s of cpu time to solve on this machine (using default 4 threads). 
+* `input-26by26hard.in`: A 26x26 instance, the hardest example, takes about 42s of real time and 138s of cpu time to solve on this machine (using default 4 threads) and about 281s with 1 thread.
+
+## Experiments
+
+Experiments were run on Intel(R) Core(TM) Ultra 9 285H and 30 GB RAM on Fedora Linux 43 (Workstation Edition) using Glucose 4.2.1 ('glucose-syrup').
+
+| Instance | Threads | Variables | Clauses | Parse | Simplification | Conflicts | Real time | CPU time | Peak memory |
+|---|---|---|---|---|---|---|---|---|---|
+| 25x25 | 4 | 58,375 | 1,443,800 | 1.17s | 4.82s | 608 (total) | 6.6s | 7.3s | 563 MB |
+| 25x25 | 1 | 58,375 | 1,443,800 | 1.18s | 4.38s | 394 | 6.4s | 6.3s | 163 MB |
+| 26x26 | 4 | 334,992 | 8,692,268 | 7.31s | 0.89s | 7,236 (total) | 42.5s | 138.3s | 2,233 MB |
+| 26x26 | 1 | 334,992 | 8,692,268 | 8.08s | 1.02s | 4,611 | 281.5s | 279.0s | 664 MB |
+
+Observations:
+
+- For `input-25by25.in`, the parsing (1.18s) and the simplification (4.38s) of Glucose took most of the total 6.4s, and the search needed only 394 conflicts. It takes time because of the size of the encoding (about 1.4 million clauses).
+- Using 4 threads instead of 1 did not make the 25x25 instance faster (6.6s and 6.4s), and it used about 3.5 times more memory (563 MB and 163 MB), because every thread keeps its own copy of the formula.
+- Increasing the grid from 25x25 to 26x26 increased the formula from about 1.4 million to about 8.7 million clauses and the solving time from about 6s to 42s with 4 threads and 281s with 1 thread. 
+- For `input-26by26hard.in`, the parsing and the simplification took only about 9s of the 281s with 1 thread. Most of the time went into the search, which needed 4,611 conflicts. 
+- On `input-26by26hard.in`, 4 threads were about 6.6 times faster than 1 thread (42.5s vs 281.5s) but used about 3.4 times more memory (2,233 MB vs 664 MB).
+- Writing the clauses directly to a temporary file, instead of collecting them in a list first (as was previously done in the first implementation of the project), was needed to generate the larger instances without running out of memory in the Python script. With the initial implementation, run for the 26x26 was not successful, not enough memory. 
