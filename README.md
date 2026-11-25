@@ -95,11 +95,11 @@ python3 nonogram.py -i instances/input-10by10.in --show-model
 
 ## Example instances 
 
-* `input-3by3.in`: A 3x3 instance, the fastest and the easiest, human-solvable
-* `input-3by3unsat.in`: A 3x3 instance, unsolvable
-* `input-5by5.in`: A 5x5 instance
-* `input-5by5unsat.in`: A 5x5 instance, unsolvable
-* `input-10by10.in`: A 10x10 instance
-* `input-10by10unsat.in`: A 10x10 instance, unsolvable
-* `input-25by25.in`: A 25x25 instance, medium-sized instance, around 7s
+* `input-3by3.in`: A 3x3 instance, the fastest and the easiest, human-solvable.
+* `input-3by3unsat.in`: A 3x3 instance, unsolvable.
+* `input-5by5.in`: A 5x5 instance.
+* `input-5by5unsat.in`: A 5x5 instance, unsolvable.
+* `input-10by10.in`: A 10x10 instance.
+* `input-10by10unsat.in`: A 10x10 instance, unsolvable.
+* `input-25by25.in`: A 25x25 instance, medium-sized instance, around 7s.
 * `input-26by26hard.in`: A 26x26 instance, the hardest example, takes approximately 61s of real time and 207s of cpu time to solve on this machine (using default 4 threads). 
