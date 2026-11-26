@@ -2,7 +2,7 @@
 
 ## Problem description 
 
-Nonograms are popular picture puzzles. Nonogram is a $m \times n$ grid of cells (not necessarily $m=n$), cells must be colored black or left empty (not colored) according to the clues on edges of the grid(constraints). Each row and column of a grid has a clue. The coloring of the row/edge must follow the constraint given by its respective numbers and do not break the constraints of the neighbouring rows and columns - with that said, it is meant that every row and every column matches its clues exactly. Constraints show the required sequence of the colored consecutive cells. Example: (3,1) clue for a row means that this row must have block of 3 colored cells, empty gap of unspecified amount of uncolored cells (minimum mandatory gap is 1), 1 colored cell. 
+Nonograms are popular picture puzzles. Nonogram is a $m \times n$ grid of cells (not necessarily $m=n$), cells must be colored black or left empty (not colored) according to the clues on edges of the grid(constraints). Each row and column of a grid has a clue. The coloring of the row/edge must follow the constraint given by its respective numbers and do not break the constraints of the neighbouring rows and columns - with that said, every row and every column must match its clues exactly. Constraints show the required sequence of the colored consecutive cells. Example: (3,1) clue for a row means that this row must have block of 3 colored cells, empty gap of unspecified amount of uncolored cells (minimum mandatory gap is 1), 1 colored cell. 
 As a result the user gets valid coloring of the cells, which results in the picture. 
 More information about the nonograms are available online [Wikipedia](https://en.wikipedia.org/wiki/Nonogram).
 
