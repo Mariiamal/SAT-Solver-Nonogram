@@ -25,19 +25,12 @@ def load_instance(input_file_name):
 def get_variable_number(cell_tuple, number_of_cols):
     return cell_tuple[0] * number_of_cols + cell_tuple[1] + 1
 
-def get_cell_row_and_col(variable_number, number_of_cols): 
-    number = variable_number - 1
-    row = number // number_of_cols
-    column = number % number_of_cols 
-    return (row, column)
-
 def generate_valid_placements(length, clue): 
     # For each cell: colored 1, not colored 0
-    # If block is colored - all cells (i,j) = 1
+    # If block is colored - all cells (i,j) inside it = 1
     valid_placements = []
     blocks_starts = []
 
-    
     # Check all possible starts of the block and recursively call the function for the subsequent blocks. 
     # If the end of the line is reached - each cell of the block has value 1.
     # Save the pattern to the valid placement list 
@@ -111,7 +104,7 @@ def encode(instance, clauses_filename):
     return variables_counter - 1, clauses_number
 
 def call_solver(clauses_filename, variables_number, clauses_number, output_filename, solver_name, verbosity): 
-    # Print CNF into formula.cnf in DIMACS format
+    # Print CNF into output file in DIMACS format
     with open(output_filename, "w") as file: 
         file.write("p cnf " + str(variables_number) + " " + str(clauses_number) + '\n')
         with open(clauses_filename, "r") as body: 
@@ -119,7 +112,6 @@ def call_solver(clauses_filename, variables_number, clauses_number, output_filen
     os.remove(clauses_filename)
 
     # Call the solver and return result 
-    # running multiple threads of glucose (4): 
     return subprocess.run(['./' + solver_name, '-model', '-verb=' + str(verbosity) , output_filename], stdout=subprocess.PIPE)
 
 # Convention: 10=SAT, 20=UNSAT, 0=UNKNOWN, 1(or other non-zero)=Error
